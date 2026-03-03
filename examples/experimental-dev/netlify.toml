@@ -1,0 +1,62 @@
+# Netlify Build Configuration für Strapi experimental-dev Example
+# https://docs.netlify.com/configure-builds/overview/
+
+[build]
+  # Build-Befehl: Monorepo bauen, dann App bauen
+  command = "yarn --cwd ../.. build:code && yarn --cwd . build"
+  # Publishe das dist Directory
+  publish = "dist"
+  # Erhöhe Timeout für größere Builds
+  timeout = 1800
+
+# Environment-Variablen für Build
+[build.environment]
+  NODE_ENV = "production"
+  NODE_VERSION = "22.11.0"
+  # Yarn Corepack aktivieren für lockfile-basierte Package Manager
+  YARN_ENABLE_COREPACK = "true"
+  # Erhöhe Node Memory für große Builds
+  NODE_OPTIONS = "--max-old-space-size=4096"
+  # Experimental Dependencies für dieses Example
+  USE_EXPERIMENTAL_DEPENDENCIES = "true"
+
+# Cache-Konfiguration für schnellere Rebuilds
+# Cachte node_modules und yarn cache vom Root-Workspace
+[[cache]]
+  paths = ["../../node_modules"]
+
+[[cache]]
+  paths = ["../../.yarn/cache"]
+
+# Include node_modules im Deploy für Production-Stabilität
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Production Kontext
+[context.production]
+  command = "yarn --cwd ../.. build:code && yarn --cwd . build"
+  
+[context.production.environment]
+  NODE_ENV = "production"
+  NODE_VERSION = "22.11.0"
+
+# Deploy Preview Kontext (für Pull Requests)
+[context.deploy-preview]
+  command = "yarn --cwd ../.. build:code && yarn --cwd . build"
+  
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
+  NODE_VERSION = "22.11.0"
+
+# Branch Deploy Kontext (für Feature Branches)
+[context.branch-deploy]
+  command = "yarn --cwd ../.. build:code && yarn --cwd . build"
+  
+[context.branch-deploy.environment]
+  NODE_ENV = "production"
+  NODE_VERSION = "22.11.0"
